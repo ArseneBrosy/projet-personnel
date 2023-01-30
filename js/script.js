@@ -13,6 +13,7 @@ const PLAYER_HEIGHT = 30;
 const PLAYER_SPEED = 10;
 const PLAYER_ROTATE_CHECK_HEIGHT = -15;
 const OUTSIDE_WALL_WIDTH = 30;
+const GRAVITY_FORCE = 0.5;
 //#endregion
 
 //#region VARIABLES
@@ -21,6 +22,7 @@ var playerX = canvas.width / 2;
 var playerY = canvas.height - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
 var playerRotation = 0;
 var playerVelocityX = 0;
+var playerVelocityY = 0;
 //#endregion
 
 //#region MOUSE
@@ -45,6 +47,7 @@ function isInWall(x, y, margin = 0) {
     return result;
 }
 
+// rotate the player around the left or right rotate check
 function rotateAround(deg, pos) {
     if (pos === 0) {
         var startX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
@@ -69,12 +72,22 @@ walls.push([canvas.width - OUTSIDE_WALL_WIDTH, 0, canvas.width, canvas.height]);
 walls.push([0, 0, canvas.width, OUTSIDE_WALL_WIDTH]);
 walls.push([0, canvas.height - OUTSIDE_WALL_WIDTH, canvas.width, canvas.height]);
 
-walls.push([canvas.width / 2 - OUTSIDE_WALL_WIDTH, 0, canvas.width / 2 + OUTSIDE_WALL_WIDTH, 300])
+walls.push([canvas.width / 2 - OUTSIDE_WALL_WIDTH, 0, canvas.width / 2 + OUTSIDE_WALL_WIDTH, canvas.height / 4])
+walls.push([canvas.width / 2 - 300, canvas.height / 2 - OUTSIDE_WALL_WIDTH, canvas.width / 2 + 300, canvas.height / 2 + OUTSIDE_WALL_WIDTH])
 
 function loop() {
     // resize canvas
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    //#region GRAVITY
+    if (!isInWall(playerX, playerY, PLAYER_HEIGHT / 2)) {
+        playerY += playerVelocityY;
+        playerVelocityY += GRAVITY_FORCE;
+    } else {
+        playerVelocityY = 0;
+    }
+    //#endregion
 
     //#region MOVE PLAYER
     playerX += Math.sin((playerRotation - 90) * (Math.PI/180)) * playerVelocityX;
@@ -85,12 +98,12 @@ function loop() {
     // left
     var leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     var leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-    while (isInWall(leftCheckX, leftCheckY)) {
+    while (isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT)) {
         rotateAround(1, 1);
         leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     }
-    while (!isInWall(leftCheckX, leftCheckY)) {
+    while (!isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT)) {
         rotateAround(-1, 1);
         leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
@@ -98,12 +111,12 @@ function loop() {
     // left
     var rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     var rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-    while (isInWall(rightCheckX, rightCheckY))  {
+    while (isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT))  {
         rotateAround(-1, 0);
         rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     }
-    while (!isInWall(rightCheckX, rightCheckY))  {
+    while (!isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT))  {
         rotateAround(1, 0);
         rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
@@ -140,16 +153,19 @@ canvas.addEventListener("mousemove", (e) => {
     mouseY = e.clientY;
 });
 document.addEventListener('keydown', function(e) {
-    // player 1
+    console.log(e.which)
     if (e.which === 65) {
         playerVelocityX = PLAYER_SPEED;
     }
     if (e.which === 68) {
         playerVelocityX = -PLAYER_SPEED;
     }
+    if (e.which === 32) {
+        playerVelocityY = -18;
+        playerY -= 25;
+    }
 });
 document.addEventListener('keyup', function(e) {
-    // player 1
     if (e.which === 65 || e.which === 68) {
         playerVelocityX = 0;
     }
