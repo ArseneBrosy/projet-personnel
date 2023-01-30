@@ -10,13 +10,15 @@ canvas.height = window.innerHeight;
 //#region CONSTANTS
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 30;
-const PLAYER_SPEED = 10;
-const PLAYER_ROTATE_CHECK_HEIGHT = -15;
+const PLAYER_SPEED = 5;
+const PLAYER_ROTATE_CHECK_HEIGHT = -PLAYER_HEIGHT / 2;
 const OUTSIDE_WALL_WIDTH = 30;
 const GRAVITY_FORCE = 1;
 const JUMP_FORCE = 21;
 const CANON_SIZE = 40;
 const CANON_WIDTH = 10;
+const PLAYER_SPRITE = new Image();
+PLAYER_SPRITE.src = "./images/player.png";
 //#endregion
 
 //#region VARIABLES
@@ -27,6 +29,12 @@ var playerRotation = 0;
 var playerDirection = 0;
 var playerVelocityX = 0;
 var playerVelocityY = 0;
+//#endregion
+
+//#region FIREBASE
+var id = parseInt(Math.random() * 10000);
+var players = [];
+var playerKeys = [];
 //#endregion
 
 //#region CANON
@@ -80,8 +88,8 @@ walls.push([canvas.width - OUTSIDE_WALL_WIDTH, 0, canvas.width, canvas.height]);
 walls.push([0, 0, canvas.width, OUTSIDE_WALL_WIDTH]);
 walls.push([0, canvas.height - OUTSIDE_WALL_WIDTH, canvas.width, canvas.height]);
 
-walls.push([canvas.width / 2 - OUTSIDE_WALL_WIDTH, 0, canvas.width / 2 + OUTSIDE_WALL_WIDTH, canvas.height / 4])
-walls.push([canvas.width / 2 - 300, canvas.height / 2 - OUTSIDE_WALL_WIDTH, canvas.width / 2 + 300, canvas.height / 2 + OUTSIDE_WALL_WIDTH])
+walls.push([canvas.width / 2 - 100, 0, canvas.width / 2 + 100, canvas.height / 4])
+walls.push([canvas.width / 2 - 300, canvas.height * 0.6 - OUTSIDE_WALL_WIDTH, canvas.width / 2 + 300, canvas.height * 0.6 + OUTSIDE_WALL_WIDTH])
 
 function loop() {
     // resize canvas
@@ -89,7 +97,7 @@ function loop() {
     canvas.height = window.innerHeight;
 
     //#region GRAVITY
-    if (!isInWall(playerX, playerY, PLAYER_HEIGHT / 2)) {
+    if (!isInWall(playerX, playerY, PLAYER_WIDTH)) {
         playerX += playerVelocityX
         playerY += playerVelocityY;
         playerVelocityY += GRAVITY_FORCE;
@@ -116,7 +124,7 @@ function loop() {
     var rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     // center
     var deg = 0;
-    while (!isInWall(leftCheckX, leftCheckY) && !isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT) && deg < 360) {
+    while (!isInWall(leftCheckX, leftCheckY) && !isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH) && deg < 360) {
         playerRotation ++;
         leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
@@ -125,27 +133,39 @@ function loop() {
         deg ++;
     }
     // left
-    while (isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT)) {
+    while (isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH)) {
         rotateAround(1, 1);
         leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     }
-    while (!isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT)) {
+    while (!isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH)) {
         rotateAround(-1, 1);
         leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     }
     // right
-    while (isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT))  {
+    while (isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH))  {
         rotateAround(-1, 0);
         rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     }
-    while (!isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_HEIGHT))  {
+    while (!isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH))  {
         rotateAround(1, 0);
         rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
         rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
     }
+    //#endregion
+
+    //#region FIREBASE
+    sendFirebasePosition(id, playerX, playerY, playerRotation);
+
+    // recuperer les joueurs
+    var listRef = database.ref('players');
+    listRef.get().then((snapshot) => {
+    if (snapshot.exists()) {
+        players = Object.values(snapshot.val());
+        playerKeys = Object.keys(snapshot.val());
+    }});
     //#endregion
 
     //#region DRAW
@@ -160,17 +180,35 @@ function loop() {
     ctx.fillStyle = "blue";
     ctx.translate(playerX, playerY - PLAYER_HEIGHT / 2);
     ctx.rotate(canonRotation * (Math.PI/180));
-    ctx.fillRect(-CANON_WIDTH / 2, -CANON_SIZE / 2, CANON_WIDTH, CANON_SIZE);
+    //ctx.fillRect(-CANON_WIDTH / 2, -CANON_SIZE / 2, CANON_WIDTH, CANON_SIZE);
     ctx.rotate(-canonRotation * (Math.PI/180));
     ctx.translate(-playerX, -(playerY - PLAYER_HEIGHT / 2));
 
     // player
-    ctx.fillStyle = "red";
     ctx.translate(playerX, playerY);
     ctx.rotate(playerRotation * (Math.PI/180));
+    ctx.fillStyle = "red"
     ctx.fillRect(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT);
+    ctx.fillStyle = "white"
+    ctx.fillRect(-PLAYER_WIDTH * 0.4, -PLAYER_HEIGHT * 0.4, 10, 10);
+    ctx.fillRect(PLAYER_WIDTH * 0.4 - 10, -PLAYER_HEIGHT * 0.4, 10, 10);
     ctx.rotate(-playerRotation * (Math.PI/180));
     ctx.translate(-playerX, -playerY);
+
+    // other players
+    for (var i = 0; i < players.length; i ++) {
+        if (playerKeys[i] != 'p' + id) {
+            ctx.translate(players[i].x, players[i].y);
+            ctx.rotate(players[i].r * (Math.PI/180));
+            ctx.fillStyle = "blue"
+            ctx.fillRect(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT);
+            ctx.fillStyle = "white"
+            ctx.fillRect(-PLAYER_WIDTH * 0.4, -PLAYER_HEIGHT * 0.4, 10, 10);
+            ctx.fillRect(PLAYER_WIDTH * 0.4 - 10, -PLAYER_HEIGHT * 0.4, 10, 10);
+            ctx.rotate(-players[i].r * (Math.PI/180));
+            ctx.translate(-players[i].x, -players[i].y);
+        }
+    }
     //#endregion
 
     requestAnimationFrame(loop);
@@ -190,8 +228,8 @@ document.addEventListener('keydown', function(e) {
         playerDirection = -PLAYER_SPEED;
     }
     if (e.which === 32) {
-        playerX += Math.sin((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH
-        playerY -= Math.cos((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH;
+        playerX += Math.sin((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH * 1.5
+        playerY -= Math.cos((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH * 1.5;
         playerVelocityY = -Math.cos((playerRotation) * (Math.PI/180)) * JUMP_FORCE;
         playerVelocityX = Math.sin((playerRotation) * (Math.PI/180)) * JUMP_FORCE;
     }
