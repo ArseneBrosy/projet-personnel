@@ -9,13 +9,16 @@ canvas.height = window.innerHeight;
 
 //#region CONSTANTS
 const PLAYER_WIDTH = 50;
-const PLAER_HEIGHT = 30;
+const PLAYER_HEIGHT = 30;
+const PLAYER_SPEED = 10;
 //#endregion
 
 //#region VARIABLES
 //#region PLAYER
 var playerX = canvas.width / 2;
-var playerY = 0;
+var playerY = canvas.height - PLAYER_HEIGHT / 2;
+var playerRotation = 0;
+var playerVelocityX = 0;
 //#endregion
 
 //#region MOUSE
@@ -29,10 +32,19 @@ function loop() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    //#region MOVE PLAYER
+    playerX += Math.sin((playerRotation - 90) * (Math.PI/180)) * playerVelocityX;
+    playerY -= Math.cos((playerRotation - 90) * (Math.PI/180)) * playerVelocityX;
+    //#endregion
+
     //#region DRAW
     // player
     ctx.fillStyle = "red";
-    ctx.fillRect(playerX - (PLAYER_WIDTH / 2), canvas.height - playerY - PLAER_HEIGHT, PLAYER_WIDTH, PLAER_HEIGHT);
+    ctx.translate(playerX, playerY);
+    ctx.rotate(playerRotation * (Math.PI/180));
+    ctx.fillRect(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT);
+    ctx.rotate(-playerRotation * (Math.PI/180));
+    ctx.translate(-playerX, -playerY);
 
     // mouse
     ctx.fillStyle = "green";
@@ -46,6 +58,21 @@ function loop() {
 canvas.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+});
+document.addEventListener('keydown', function(e) {
+    // player 1
+    if (e.which === 65) {
+        playerVelocityX = PLAYER_SPEED;
+    }
+    if (e.which === 68) {
+        playerVelocityX = -PLAYER_SPEED;
+    }
+});
+document.addEventListener('keyup', function(e) {
+    // player 1
+    if (e.which === 65 || e.which === 68) {
+        playerVelocityX = 0;
+    }
 });
 
 // start game
