@@ -32,7 +32,7 @@ var playerVelocityY = 0;
 //#endregion
 
 //#region FIREBASE
-var id = parseInt(Math.random() * 10000);
+var id = parseInt(Math.random() * 1000000);
 var players = [];
 var playerKeys = [];
 //#endregion
