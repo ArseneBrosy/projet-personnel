@@ -2,7 +2,7 @@
 // by Arsène Brosy
 var canvas = document.getElementById("game");
 var ctx = canvas.getContext("2d");
-
+CloseMenus();
 // resize canvas
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -10,7 +10,7 @@ canvas.height = window.innerHeight;
 //#region CONSTANTS
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 30;
-const PLAYER_SPEED = 5;
+const PLAYER_SPEED = 8.45283532523858523;
 const PLAYER_ROTATE_CHECK_HEIGHT = -PLAYER_HEIGHT / 2;
 const OUTSIDE_WALL_WIDTH = 30;
 const GRAVITY_FORCE = 1;
@@ -19,6 +19,7 @@ const CANON_SIZE = 40;
 const CANON_WIDTH = 10;
 const PLAYER_SPRITE = new Image();
 PLAYER_SPRITE.src = "./images/player.png";
+const REMOVE_TIMEOUT = 100;
 //#endregion
 
 //#region VARIABLES
@@ -90,6 +91,9 @@ walls.push([0, canvas.height - OUTSIDE_WALL_WIDTH, canvas.width, canvas.height])
 
 walls.push([canvas.width / 2 - 100, 0, canvas.width / 2 + 100, canvas.height / 4])
 walls.push([canvas.width / 2 - 300, canvas.height * 0.6 - OUTSIDE_WALL_WIDTH, canvas.width / 2 + 300, canvas.height * 0.6 + OUTSIDE_WALL_WIDTH])
+
+// remove players
+var removeCount = 0;
 
 function loop() {
     // resize canvas
@@ -211,6 +215,14 @@ function loop() {
     }
     //#endregion
 
+    //#region REMOVE PLAYERS
+    removeCount ++;
+    if (removeCount > REMOVE_TIMEOUT) {
+        removeCount = 0;
+        deletePlayers();
+    }
+    //#endregion
+
     requestAnimationFrame(loop);
 }
 
@@ -220,7 +232,6 @@ canvas.addEventListener("mousemove", (e) => {
     mouseY = e.clientY;
 });
 document.addEventListener('keydown', function(e) {
-    console.log(e.which)
     if (e.which === 65) {
         playerDirection = PLAYER_SPEED;
     }

@@ -9,27 +9,35 @@ const database = firebase.database();
 
 
 // ajoute les donnees dans la base de donnees
-function sendFirebasePosition(playerId, x, y, r) {
-    var listRef = database.ref('players/p' + playerId.toString());
+function sendFirebasePosition(name, x, y, r) {
+    var listRef = database.ref('players/p' + name);
     listRef.set({
         x: x,
         y: y,
         r: r
-    })
+    });
 }
 
-// lire les donnees
-function getFirebasePlayers() {
+function deletePlayers() {
     var listRef = database.ref('players');
-    var result = null;
+    listRef.remove();
+}
+
+// ajoute les donnees dans la base de donnees
+function createFirebaseAccount(name, password) {
+    var listRef = database.ref('accounts/' + name);
+    listRef.set({
+        passHash: hash(password)
+    });
+}
+
+// ajoute les donnees dans la base de donnees
+function isCorrectFirebaseAccount(name, password) {
+    var listRef = database.ref('accounts/'+name);
     listRef.get().then((snapshot) => {
     if (snapshot.exists()) {
-        result = snapshot.val();
-    } else {
-        console.log("No data available");
-    }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return result;
+        if (snapshot.val().passHash === hash(password)) {
+
+        }
+    }});
 }

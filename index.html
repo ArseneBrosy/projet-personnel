@@ -9,19 +9,26 @@
 </head>
 <body oncontextmenu="return false;">
     <canvas id="game"></canvas>
-    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-database-compat.js"></script>
-    <script src="./js/firebase.js"></script>
-    <script src="./js/script.js"></script>
 
+    <!--MENUS-->
     <div class="menu connection">
-        <div id="connection-menu">
+        <div class="little-menu">
             <img src="./images/account.png">
             <p>Connection</p>
             <input type="text" placeholder="Pseudo">
             <input type="password" placeholder="Mot de passe">
-            <button>Se connecter</button>
+            <button onclick="">Se connecter</button>
         </div>
     </div>
+
+    <!--FIREBASE-->
+    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-database-compat.js"></script>
+    <!--SECONDARY SCRIPTS-->
+    <script src="./js/firebase.js"></script>
+    <script src="./js/menu-manager.js"></script>
+    <script src="./js/hash.js"></script>
+    <!--MAIN SCRIPT-->
+    <script src="./js/script.js"></script>
 </body>
 </html>

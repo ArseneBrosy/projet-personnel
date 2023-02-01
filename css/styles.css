@@ -16,7 +16,7 @@
     background: linear-gradient(#F77F00, #FCBF49);
 }
 
-#connection-menu {
+.little-menu {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -34,7 +34,7 @@
     align-items: center;
 }
 
-#connection-menu * {
+.little-menu > * {
     margin: 0;
     height: 40px;
     width: 60%;
@@ -44,7 +44,7 @@
     padding: 0 10px;
 }
 
-#connection-menu img {
+.little-menu img {
     height: 100px;
     width: 100px;
     padding: 0;
@@ -52,7 +52,7 @@
     border-radius: 100px;
 }
 
-#connection-menu p {
+.little-menu p {
     height: 40px;
     padding: 0;
     border: none;
@@ -61,7 +61,8 @@
     color: #999999
 }
 
-#connection-menu button {
+.little-menu button {
     background-color: #F77F00;
     font-weight: bold;
+    cursor: pointer;
 }
