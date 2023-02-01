@@ -213,6 +213,11 @@ function loop() {
             ctx.fillRect(PLAYER_WIDTH * 0.4 - 10, -PLAYER_HEIGHT * 0.4, 10, 10);
             ctx.rotate(-players[i].r * (Math.PI/180));
             ctx.translate(-players[i].x, -players[i].y);
+
+            // pseudo
+            ctx.fillStyle = "black";
+            ctx.font = "bold 20px Segoe UI";
+            ctx.fillText(playerKeys[i], players[i].x - playerKeys[i].length * 5, players[i].y - PLAYER_HEIGHT);
         }
     }
     //#endregion
