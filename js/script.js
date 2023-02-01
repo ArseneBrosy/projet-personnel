@@ -2,15 +2,16 @@
 // by Arsène Brosy
 var canvas = document.getElementById("game");
 var ctx = canvas.getContext("2d");
-CloseMenus();
 // resize canvas
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+OpenMenu("connection");
+
 //#region CONSTANTS
 const PLAYER_WIDTH = 50;
 const PLAYER_HEIGHT = 30;
-const PLAYER_SPEED = 8.45283532523858523;
+const PLAYER_SPEED = 8;
 const PLAYER_ROTATE_CHECK_HEIGHT = -PLAYER_HEIGHT / 2;
 const OUTSIDE_WALL_WIDTH = 30;
 const GRAVITY_FORCE = 1;
@@ -19,7 +20,7 @@ const CANON_SIZE = 40;
 const CANON_WIDTH = 10;
 const PLAYER_SPRITE = new Image();
 PLAYER_SPRITE.src = "./images/player.png";
-const REMOVE_TIMEOUT = 100;
+const REMOVE_TIMEOUT = 500;
 //#endregion
 
 //#region VARIABLES
@@ -33,7 +34,6 @@ var playerVelocityY = 0;
 //#endregion
 
 //#region FIREBASE
-var id = parseInt(Math.random() * 1000000);
 var players = [];
 var playerKeys = [];
 //#endregion
@@ -161,7 +161,9 @@ function loop() {
     //#endregion
 
     //#region FIREBASE
-    sendFirebasePosition(id, playerX, playerY, playerRotation);
+    if (connectedAccount != "") {
+        sendFirebasePosition(connectedAccount, playerX, playerY, playerRotation);
+    }
 
     // recuperer les joueurs
     var listRef = database.ref('players');
@@ -201,7 +203,7 @@ function loop() {
 
     // other players
     for (var i = 0; i < players.length; i ++) {
-        if (playerKeys[i] != 'p' + id) {
+        if (playerKeys[i] != connectedAccount) {
             ctx.translate(players[i].x, players[i].y);
             ctx.rotate(players[i].r * (Math.PI/180));
             ctx.fillStyle = "blue"
@@ -211,6 +213,11 @@ function loop() {
             ctx.fillRect(PLAYER_WIDTH * 0.4 - 10, -PLAYER_HEIGHT * 0.4, 10, 10);
             ctx.rotate(-players[i].r * (Math.PI/180));
             ctx.translate(-players[i].x, -players[i].y);
+
+            // pseudo
+            ctx.fillStyle = "black";
+            ctx.font = "bold 20px Segoe UI";
+            ctx.fillText(playerKeys[i], players[i].x - playerKeys[i].length * 5, players[i].y - PLAYER_HEIGHT);
         }
     }
     //#endregion
