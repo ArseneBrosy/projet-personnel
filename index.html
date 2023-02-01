@@ -15,9 +15,29 @@
         <div class="little-menu">
             <img src="./images/account.png">
             <p>Connection</p>
-            <input type="text" placeholder="Pseudo">
-            <input type="password" placeholder="Mot de passe">
-            <button onclick="">Se connecter</button>
+            <input type="text" id="name-connect" placeholder="Pseudo">
+            <input type="password" id="password-connect" placeholder="Mot de passe">
+            <p class="error" id="error-connect"></p>
+            <button onclick="ConnectToAccount();">Se connecter</button>
+            <span>
+                <button class="bottom-btn" onclick="CreateFakeAccount();">Jouer sans compte</button>
+                <button class="bottom-btn" onclick="OpenMenu('register');">Je n'ai pas de compte</button>
+            </span>
+        </div>
+    </div>
+    <div class="menu register">
+        <div class="little-menu">
+            <img src="./images/account.png">
+            <p>Créer un compte</p>
+            <input type="text" id="name-register" placeholder="Pseudo">
+            <input type="password" id="password-register" placeholder="Mot de passe">
+            <input type="password" id="password-confirm" placeholder="Confirmer mot de passe">
+            <p class="error" id="error-register"></p>
+            <button onclick="CreateFirebaseAccount();">Créer un compte</button>
+            <span>
+                <button class="bottom-btn" onclick="CreateFakeAccount();">Jouer sans compte</button>
+                <button class="bottom-btn" onclick="OpenMenu('connection');">J'ai déja un compte</button>
+            </span>
         </div>
     </div>
 
@@ -27,7 +47,7 @@
     <!--SECONDARY SCRIPTS-->
     <script src="./js/firebase.js"></script>
     <script src="./js/menu-manager.js"></script>
-    <script src="./js/hash.js"></script>
+    <script src="./js/account.js"></script>
     <!--MAIN SCRIPT-->
     <script src="./js/script.js"></script>
 </body>

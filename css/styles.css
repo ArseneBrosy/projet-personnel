@@ -34,7 +34,7 @@
     align-items: center;
 }
 
-.little-menu > * {
+.little-menu input {
     margin: 0;
     height: 40px;
     width: 60%;
@@ -54,6 +54,7 @@
 
 .little-menu p {
     height: 40px;
+    width: 60%;
     padding: 0;
     border: none;
     text-align: center;
@@ -61,8 +62,39 @@
     color: #999999
 }
 
+.little-menu .error {
+    height: auto;
+    font-size: 1rem;
+    text-align: left;
+    border-radius: 0;
+    color: #D62828
+}
+
+.little-menu span .bottom-btn {
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 0.75rem;
+    color: #F77F00;
+    width: auto;
+    display: inline;
+}
+
+.little-menu span {
+    width: 60%;
+    display: flex;
+    justify-content: space-between;
+}
+
 .little-menu button {
     background-color: #F77F00;
     font-weight: bold;
     cursor: pointer;
+    margin: 0;
+    height: 40px;
+    width: 60%;
+    outline: none;
+    border-radius: 10px;
+    padding: 0 10px;
 }
