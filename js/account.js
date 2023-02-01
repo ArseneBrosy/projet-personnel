@@ -31,12 +31,18 @@ function hash(string) {
 // ajoute les donnees dans la base de donnees
 function CreateFirebaseAccount() {
     var error = "";
+    var name = HTMLnameRegister.value;
+    var password = HTMLregisterPassword.value;
+
     if (HTMLregisterPassword.value != HTMLconfirmationPassword.value) {
         error = "les mots de passe ne correspondent pas"
     }
-
-    var name = HTMLnameRegister.value;
-    var password = HTMLregisterPassword.value;
+    if (password.length < 3) {
+        error = "le mot de passe doit contenir au moins 3 caractères"
+    }
+    if (name.length < 3) {
+        error = "le pseudo doit contenir au moins 3 caractères"
+    }
 
     var listRef = database.ref('accounts/' + name);
     listRef.get().then((snapshot) => {
@@ -47,6 +53,7 @@ function CreateFirebaseAccount() {
             passHash: hash(password)
         }).then(() => {
             connectedAccount = name;
+            localStorage.setItem("connectedAccount", name);
         });
     }
     }).then(() => {
@@ -76,6 +83,7 @@ function ConnectToAccount() {
     if (snapshot.exists()) {
         if (snapshot.val().passHash === hash(password)) {
             connectedAccount = name;
+            localStorage.setItem("connectedAccount", name);
         } else {
             error = "mot de passe incorrect";
         }
@@ -90,3 +98,13 @@ function ConnectToAccount() {
         }
     });
 }
+
+//#region START
+var listRef = database.ref('accounts/'+localStorage.getItem("connectedAccount"));
+listRef.get().then((snapshot) => {
+    if (snapshot.exists()) {
+        connectedAccount = localStorage.getItem("connectedAccount");
+        CloseMenus();
+    }
+    });
+//#endregion

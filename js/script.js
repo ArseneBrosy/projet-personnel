@@ -20,7 +20,7 @@ const CANON_SIZE = 40;
 const CANON_WIDTH = 10;
 const PLAYER_SPRITE = new Image();
 PLAYER_SPRITE.src = "./images/player.png";
-const REMOVE_TIMEOUT = 100;
+const REMOVE_TIMEOUT = 500;
 //#endregion
 
 //#region VARIABLES
