@@ -98,7 +98,7 @@ function ConnectToAccount() {
         }
     });
 }
-
+/*
 //#region START
 var listRef = database.ref('accounts/'+localStorage.getItem("connectedAccount"));
 listRef.get().then((snapshot) => {
@@ -107,4 +107,4 @@ listRef.get().then((snapshot) => {
         CloseMenus();
     }
     });
-//#endregion
+//#endregion*/

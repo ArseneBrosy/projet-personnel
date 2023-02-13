@@ -50,6 +50,11 @@ var mouseY = 0;
 //#region walls
 var walls = []
 //#endregion
+
+//#region bullets
+var bullets = [];
+var bulletSpeed = 50;
+//#endregion
 //#endregion
 
 //#region FUNCTIONS
@@ -81,19 +86,24 @@ function rotateAround(deg, pos) {
         playerY = startY + Math.sin((playerRotation + 180) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((90 - playerRotation + 180) * (Math.PI/180)) * -PLAYER_ROTATE_CHECK_HEIGHT;
     }
 }
+
+// shoot a bullet
+function shoot() {
+    bullets.push([playerX, playerY, canonRotation]);
+}
 //#endregion
 
 // create outside walls
-walls.push([0, 0, OUTSIDE_WALL_WIDTH, canvas.height]);
-walls.push([canvas.width - OUTSIDE_WALL_WIDTH, 0, canvas.width, canvas.height]);
-walls.push([0, 0, canvas.width, OUTSIDE_WALL_WIDTH]);
-walls.push([0, canvas.height - OUTSIDE_WALL_WIDTH, canvas.width, canvas.height]);
+//    714x1536
+var mapHeight = 700;
+var mapWidth = 1400;
+walls.push([0, 0, OUTSIDE_WALL_WIDTH, mapHeight]);
+walls.push([mapWidth - OUTSIDE_WALL_WIDTH, 0, mapWidth, mapHeight]);
+walls.push([0, 0, mapWidth, OUTSIDE_WALL_WIDTH]);
+walls.push([0, mapHeight - OUTSIDE_WALL_WIDTH, mapWidth, mapHeight]);
 
-walls.push([canvas.width / 2 - 100, 0, canvas.width / 2 + 100, canvas.height / 4])
-walls.push([canvas.width / 2 - 300, canvas.height * 0.6 - OUTSIDE_WALL_WIDTH, canvas.width / 2 + 300, canvas.height * 0.6 + OUTSIDE_WALL_WIDTH])
-
-// remove players
-var removeCount = 0;
+walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 + 100, mapHeight / 4])
+walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
 
 function loop() {
     // resize canvas
@@ -112,7 +122,7 @@ function loop() {
     //#endregion
 
     //#region CANON
-    canonRotation = 360 - Math.atan((playerX - mouseX) / (playerY - mouseY)) / (Math.PI/180);
+    canonRotation = (mouseY > playerY ? 0 : 180) + Math.atan(((playerX + xOff) - mouseX) / (playerY - mouseY)) / (Math.PI/180);
     //#endregion
 
     //#region MOVE PLAYER
@@ -174,12 +184,26 @@ function loop() {
     }});
     //#endregion
 
+    //#region BULLETS
+    for (var i = 0; i < bullets.length; i++) {
+        bullets[i][0] += Math.sin((bullets[i][2]) * (Math.PI/180)) * bulletSpeed;
+        bullets[i][1] += Math.cos((bullets[i][2]) * (Math.PI/180)) * bulletSpeed
+    }
+    //#endregion
+
     //#region DRAW
+    // test
+    var xMul = canvas.width / mapWidth;
+    var yMul = canvas.height / mapHeight;
+    var mul = yMul > xMul ? xMul : yMul;
+    var yOff = (canvas.height - mapHeight * mul) / 2;
+    var xOff = (canvas.width - mapWidth * mul) / 2;
+
     // walls
     for (var i = 0; i < walls.length; i++) {
         // background
         ctx.fillStyle = "#E2E289";
-        ctx.fillRect(walls[i][0] - 1, walls[i][1] - 1, walls[i][2] - walls[i][0] + 2, walls[i][3] - walls[i][1] + 2);
+        ctx.fillRect(walls[i][0] * mul + xOff, walls[i][1] * mul + yOff, (walls[i][2] - walls[i][0]) * mul, (walls[i][3] - walls[i][1]) * mul);
     }
 
     // canon
@@ -190,45 +214,47 @@ function loop() {
     ctx.rotate(-canonRotation * (Math.PI/180));
     ctx.translate(-playerX, -(playerY - PLAYER_HEIGHT / 2));
 
+    // bullets
+    for (var i = 0; i < bullets.length; i++) {
+        ctx.fillRect((bullets[i][0] - 5) * mul + xOff, (bullets[i][1] - 5) * mul + yOff, 10 * mul, 10 * mul);
+        if (Math.abs(bullets[i][0]) > 1000 || Math.abs(bullets[i][1]) > 1000) {
+            bullets.splice(i, 1);
+        }
+    }
+
     // player
-    ctx.translate(playerX, playerY);
+    ctx.translate(playerX * mul + xOff, playerY * mul + yOff);
     ctx.rotate(playerRotation * (Math.PI/180));
     ctx.fillStyle = "red"
-    ctx.fillRect(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT);
+    ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
     ctx.fillStyle = "white"
-    ctx.fillRect(-PLAYER_WIDTH * 0.4, -PLAYER_HEIGHT * 0.4, 10, 10);
-    ctx.fillRect(PLAYER_WIDTH * 0.4 - 10, -PLAYER_HEIGHT * 0.4, 10, 10);
+    ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
+    ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
     ctx.rotate(-playerRotation * (Math.PI/180));
-    ctx.translate(-playerX, -playerY);
+    ctx.translate(-playerX * mul + xOff, -playerY * mul + yOff);
 
     // other players
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
-            ctx.translate(players[i].x, players[i].y);
+            ctx.translate(players[i].x * mul + xOff, players[i].y * mul - yOff);
             ctx.rotate(players[i].r * (Math.PI/180));
             ctx.fillStyle = "blue"
-            ctx.fillRect(-PLAYER_WIDTH / 2, -PLAYER_HEIGHT / 2, PLAYER_WIDTH, PLAYER_HEIGHT);
+            ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
             ctx.fillStyle = "white"
-            ctx.fillRect(-PLAYER_WIDTH * 0.4, -PLAYER_HEIGHT * 0.4, 10, 10);
-            ctx.fillRect(PLAYER_WIDTH * 0.4 - 10, -PLAYER_HEIGHT * 0.4, 10, 10);
+            ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
+            ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
             ctx.rotate(-players[i].r * (Math.PI/180));
-            ctx.translate(-players[i].x, -players[i].y);
+            ctx.translate(-players[i].x * mul + xOff, -players[i].y * mul - yOff);
 
             // pseudo
             ctx.fillStyle = "black";
-            ctx.font = "bold 20px Segoe UI";
-            ctx.fillText(playerKeys[i], players[i].x - playerKeys[i].length * 5, players[i].y - PLAYER_HEIGHT);
+            ctx.font = "bold " + 20 * mul.toString() + "px Segoe UI";
+            ctx.fillText(playerKeys[i], (players[i].x - playerKeys[i].length * 5) * mul + xOff, (players[i].y - PLAYER_HEIGHT) * mul + yOff);
         }
     }
     //#endregion
 
-    //#region REMOVE PLAYERS
-    removeCount ++;
-    if (removeCount > REMOVE_TIMEOUT) {
-        removeCount = 0;
-        deletePlayers();
-    }
-    //#endregion
+    shoot();
 
     requestAnimationFrame(loop);
 }
@@ -237,6 +263,11 @@ function loop() {
 canvas.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
+});
+canvas.addEventListener("mousedown", (e) => {
+    if (e.which === 1) {
+        shoot();
+    }
 });
 document.addEventListener('keydown', function(e) {
     if (e.which === 65) {
@@ -257,6 +288,10 @@ document.addEventListener('keyup', function(e) {
         playerDirection = 0;
     }
 });
+
+window.addEventListener('beforeunload', function() {
+    deletePlayers();
+}, false);
 
 // start game
 requestAnimationFrame(loop);
