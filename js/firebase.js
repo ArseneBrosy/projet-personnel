@@ -11,11 +11,30 @@ const database = firebase.database();
 // ajoute les donnees dans la base de donnees
 function sendFirebasePosition(name, x, y, r) {
     var listRef = database.ref('players/' + name);
-    listRef.set({
+    listRef.update({
         x: x,
         y: y,
         r: r
     });
+}
+
+function hitPlayer(name, pv) {
+    var listRef = database.ref('players/' + name);
+    var _life = 0;
+    listRef.get().then((snapshot) => {
+        if (snapshot.exists() && snapshot.val().life != null) {
+            _life = snapshot.val().life;
+        }
+    }).then(() => {
+        listRef.set({
+            life: _life + pv
+        })
+    });
+}
+
+function sendFirebaseBullets(name, bullets) {
+    var listRef = database.ref('players-bullets/' + name);
+    listRef.set(Object.assign(bullets));
 }
 
 function deletePlayers() {

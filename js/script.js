@@ -24,9 +24,11 @@ const REMOVE_TIMEOUT = 500;
 //#endregion
 
 //#region VARIABLES
+var mapHeight = 700;
+var mapWidth = 1400;
 //#region PLAYER
-var playerX = canvas.width / 2;
-var playerY = canvas.height - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
+var playerX = mapWidth / 2;
+var playerY = mapHeight - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
 var playerRotation = 0;
 var playerDirection = 0;
 var playerVelocityX = 0;
@@ -36,6 +38,7 @@ var playerVelocityY = 0;
 //#region FIREBASE
 var players = [];
 var playerKeys = [];
+var otherBullets = [];
 //#endregion
 
 //#region CANON
@@ -49,11 +52,12 @@ var mouseY = 0;
 
 //#region walls
 var walls = []
+var mapId = 0;
 //#endregion
 
 //#region bullets
 var bullets = [];
-var bulletSpeed = 50;
+var bulletSpeed = 15;
 //#endregion
 //#endregion
 
@@ -69,21 +73,29 @@ function isInWall(x, y, margin = 0) {
     return result;
 }
 
+//
+function playerSin() {
+    return Math.sin(playerRotation * (Math.PI/180));
+}
+function playerCos() {
+    return Math.cos(playerRotation * (Math.PI/180));
+}
+
 // rotate the player around the left or right rotate check
 function rotateAround(deg, pos) {
     if (pos === 0) {
-        var startX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        var startY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        var startX = playerX + playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        var startY = playerY - playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
         playerRotation += deg
-        playerX = startX + Math.cos((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH / 2 - Math.cos((90 - playerRotation) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        playerY = startY + Math.sin((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((90 - playerRotation) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        playerX = startX + playerCos() * PLAYER_WIDTH / 2 - playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        playerY = startY + playerSin() * PLAYER_WIDTH / 2 + playerCos() * PLAYER_ROTATE_CHECK_HEIGHT;
     }
     if (pos === 1) {
-        var startX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        var startY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        var startX = playerX - playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        var startY = playerY + playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
         playerRotation += deg
-        playerX = startX + Math.cos((playerRotation + 180) * (Math.PI/180)) * PLAYER_WIDTH / 2 - Math.cos((90 - playerRotation + 180) * (Math.PI/180)) * -PLAYER_ROTATE_CHECK_HEIGHT;
-        playerY = startY + Math.sin((playerRotation + 180) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((90 - playerRotation + 180) * (Math.PI/180)) * -PLAYER_ROTATE_CHECK_HEIGHT;
+        playerX = startX + playerCos() * -1 * PLAYER_WIDTH / 2 - playerSin() * -1 * -PLAYER_ROTATE_CHECK_HEIGHT;
+        playerY = startY + playerSin() * -1 * PLAYER_WIDTH / 2 + playerCos() * -1 * -PLAYER_ROTATE_CHECK_HEIGHT;
     }
 }
 
@@ -93,17 +105,44 @@ function shoot() {
 }
 //#endregion
 
-// create outside walls
-//    714x1536
-var mapHeight = 700;
-var mapWidth = 1400;
+//#region CREATE MAP
+// outside walls
 walls.push([0, 0, OUTSIDE_WALL_WIDTH, mapHeight]);
 walls.push([mapWidth - OUTSIDE_WALL_WIDTH, 0, mapWidth, mapHeight]);
 walls.push([0, 0, mapWidth, OUTSIDE_WALL_WIDTH]);
 walls.push([0, mapHeight - OUTSIDE_WALL_WIDTH, mapWidth, mapHeight]);
 
-walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 + 100, mapHeight / 4])
-walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+// maps
+switch (mapId) {
+    case 0:
+        // top box
+        walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 - 100 + OUTSIDE_WALL_WIDTH * 2, mapHeight / 4])
+        walls.push([mapWidth / 2 - 100, mapHeight / 4 - OUTSIDE_WALL_WIDTH * 2, mapWidth / 2 + 100, mapHeight / 4])
+
+        // center plateform
+        walls.push([mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+        walls.push([mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+        walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+
+        // corner
+        walls.push([mapWidth - OUTSIDE_WALL_WIDTH * 4, mapHeight - OUTSIDE_WALL_WIDTH * 4, mapWidth, mapHeight]);
+
+        // left box
+        walls.push([0, 200, OUTSIDE_WALL_WIDTH * 4, 300]);
+        break;
+    case 1:
+        // cross
+        walls.push([mapWidth / 2 - OUTSIDE_WALL_WIDTH, OUTSIDE_WALL_WIDTH * 3, mapWidth / 2 + OUTSIDE_WALL_WIDTH, mapHeight - OUTSIDE_WALL_WIDTH * 3]);
+        walls.push([OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 - OUTSIDE_WALL_WIDTH, mapWidth - OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 + OUTSIDE_WALL_WIDTH]);
+
+        // dots
+        walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 2, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 2])
+        walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 1, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 1])
+        walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 1.5])
+        walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 2.5, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 2.5])
+        break;
+}
+//#endregion
 
 function loop() {
     // resize canvas
@@ -121,58 +160,55 @@ function loop() {
     }
     //#endregion
 
-    //#region CANON
-    canonRotation = (mouseY > playerY ? 0 : 180) + Math.atan(((playerX + xOff) - mouseX) / (playerY - mouseY)) / (Math.PI/180);
-    //#endregion
-
     //#region MOVE PLAYER
-    playerX += Math.sin((playerRotation - 90) * (Math.PI/180)) * playerDirection;
-    playerY -= Math.cos((playerRotation - 90) * (Math.PI/180)) * playerDirection;
+    playerX += playerCos() * -1 * playerDirection;
+    playerY -= playerSin() * playerDirection;
     //#endregion
 
     //#region ROTATE PLAYER
     // checks
-    var leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-    var leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-    var rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-    var rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+    var leftCheckX = playerX + playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+    var leftCheckY = playerY - playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
+    var rightCheckX = playerX - playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+    var rightCheckY = playerY + playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
     // center
     var deg = 0;
     while (!isInWall(leftCheckX, leftCheckY) && !isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH) && deg < 360) {
         playerRotation ++;
-        leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        leftCheckX = playerX + playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        leftCheckY = playerY - playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
+        rightCheckX = playerX - playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        rightCheckY = playerY + playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
         deg ++;
     }
     // left
     while (isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH)) {
         rotateAround(1, 1);
-        leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        leftCheckX = playerX + playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        leftCheckY = playerY - playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
     }
     while (!isInWall(leftCheckX, leftCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH)) {
         rotateAround(-1, 1);
-        leftCheckX = playerX + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        leftCheckY = playerY - Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        leftCheckX = playerX + playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        leftCheckY = playerY - playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
     }
     // right
     while (isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH))  {
         rotateAround(-1, 0);
-        rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        rightCheckX = playerX - playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        rightCheckY = playerY + playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
     }
     while (!isInWall(rightCheckX, rightCheckY) && isInWall(playerX, playerY, PLAYER_WIDTH))  {
         rotateAround(1, 0);
-        rightCheckX = playerX - Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
-        rightCheckY = playerY + Math.cos((playerRotation - 90) * (Math.PI/180)) * PLAYER_WIDTH / 2 + Math.sin((playerRotation - 90) * (Math.PI/180)) * PLAYER_ROTATE_CHECK_HEIGHT;
+        rightCheckX = playerX - playerCos() * -1 * PLAYER_WIDTH / 2 + playerSin() * PLAYER_ROTATE_CHECK_HEIGHT;
+        rightCheckY = playerY + playerSin() * PLAYER_WIDTH / 2 + playerCos() * -1 * PLAYER_ROTATE_CHECK_HEIGHT;
     }
     //#endregion
 
     //#region FIREBASE
     if (connectedAccount != "") {
         sendFirebasePosition(connectedAccount, playerX, playerY, playerRotation);
+        sendFirebaseBullets(connectedAccount, bullets);
     }
 
     // recuperer les joueurs
@@ -182,17 +218,26 @@ function loop() {
         players = Object.values(snapshot.val());
         playerKeys = Object.keys(snapshot.val());
     }});
+
+    var listRef = database.ref('players-bullets');
+    listRef.get().then((snapshot) => {
+    if (snapshot.exists()) {
+        otherBullets = Object.values(snapshot.val());
+    }});
     //#endregion
 
     //#region BULLETS
     for (var i = 0; i < bullets.length; i++) {
         bullets[i][0] += Math.sin((bullets[i][2]) * (Math.PI/180)) * bulletSpeed;
-        bullets[i][1] += Math.cos((bullets[i][2]) * (Math.PI/180)) * bulletSpeed
+        bullets[i][1] += Math.cos((bullets[i][2]) * (Math.PI/180)) * bulletSpeed;
+        if (isInWall(bullets[i][0], bullets[i][1])) {
+            bullets.splice(i, 1);
+        }
     }
     //#endregion
 
     //#region DRAW
-    // test
+    // calc offsets & mul
     var xMul = canvas.width / mapWidth;
     var yMul = canvas.height / mapHeight;
     var mul = yMul > xMul ? xMul : yMul;
@@ -215,11 +260,16 @@ function loop() {
     ctx.translate(-playerX, -(playerY - PLAYER_HEIGHT / 2));
 
     // bullets
+    ctx.fillStyle = "green";
+    if (otherBullets[0] != null) {
+        for (var i = 0; i < otherBullets[0].length; i++) {
+            ctx.fillRect((otherBullets[0][i][0] - 5) * mul + xOff, (otherBullets[0][i][1] - 5) * mul + yOff, 10 * mul, 10 * mul);
+        }
+    }
+
+    ctx.fillStyle = "red";
     for (var i = 0; i < bullets.length; i++) {
         ctx.fillRect((bullets[i][0] - 5) * mul + xOff, (bullets[i][1] - 5) * mul + yOff, 10 * mul, 10 * mul);
-        if (Math.abs(bullets[i][0]) > 1000 || Math.abs(bullets[i][1]) > 1000) {
-            bullets.splice(i, 1);
-        }
     }
 
     // player
@@ -236,7 +286,7 @@ function loop() {
     // other players
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
-            ctx.translate(players[i].x * mul + xOff, players[i].y * mul - yOff);
+            ctx.translate(players[i].x * mul - xOff, players[i].y * mul - yOff);
             ctx.rotate(players[i].r * (Math.PI/180));
             ctx.fillStyle = "blue"
             ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
@@ -244,7 +294,15 @@ function loop() {
             ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
             ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
             ctx.rotate(-players[i].r * (Math.PI/180));
-            ctx.translate(-players[i].x * mul + xOff, -players[i].y * mul - yOff);
+            ctx.translate(-players[i].x * mul - xOff, -players[i].y * mul - yOff);
+
+            // hitted by my bullet
+            for (var k = 0; k < bullets.length; k++) {
+                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_HEIGHT / 2) {
+                    bullets.splice(k, 1);
+                    hitPlayer(playerKeys[i], 1);
+                }
+            }
 
             // pseudo
             ctx.fillStyle = "black";
@@ -254,8 +312,18 @@ function loop() {
     }
     //#endregion
 
-    shoot();
+    //#region CANON
+    canonRotation = (mouseY > (playerY * mul + yOff) ? 0 : 180) + Math.atan(((playerX * mul + xOff) - mouseX) / ((playerY * mul + yOff) - mouseY)) / (Math.PI/180);
+    //#endregion
 
+    playerRotation %= 360;
+    if (playerX < 0 || playerX > mapWidth || playerY < 0 || playerY > mapHeight) {
+        playerX = mapWidth / 2;
+        playerY = mapHeight - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
+        playerRotation = 0;
+        playerVelocityX = 0;
+        playerVelocityY = 0;
+    }
     requestAnimationFrame(loop);
 }
 
@@ -276,11 +344,11 @@ document.addEventListener('keydown', function(e) {
     if (e.which === 68) {
         playerDirection = -PLAYER_SPEED;
     }
-    if (e.which === 32) {
-        playerX += Math.sin((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH * 1.5
-        playerY -= Math.cos((playerRotation) * (Math.PI/180)) * PLAYER_WIDTH * 1.5;
-        playerVelocityY = -Math.cos((playerRotation) * (Math.PI/180)) * JUMP_FORCE;
-        playerVelocityX = Math.sin((playerRotation) * (Math.PI/180)) * JUMP_FORCE;
+    if (e.which === 32 && isInWall(playerX, playerY, PLAYER_WIDTH)) {
+        playerX += playerSin() * PLAYER_WIDTH * 1.5
+        playerY -= playerCos() * PLAYER_WIDTH * 1.5;
+        playerVelocityY = -playerCos() * JUMP_FORCE;
+        playerVelocityX = playerSin() * JUMP_FORCE;
     }
 });
 document.addEventListener('keyup', function(e) {

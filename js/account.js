@@ -19,7 +19,7 @@ function hash(string) {
     var hash = 0;
     // if the length of the string is 0, return 0
     if (string.length == 0) return hash;
-    for (i = 0 ;i<string.length ; i++)
+    for (i = 0 ;i < string.length ; i++)
     {
         ch = string.charCodeAt(i);
         hash = ((hash << 5) - hash) + ch;
@@ -98,8 +98,8 @@ function ConnectToAccount() {
         }
     });
 }
-/*
-//#region START
+
+/*//#region START
 var listRef = database.ref('accounts/'+localStorage.getItem("connectedAccount"));
 listRef.get().then((snapshot) => {
     if (snapshot.exists()) {
