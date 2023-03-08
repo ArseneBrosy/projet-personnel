@@ -95,6 +95,7 @@ function ConnectToAccount() {
             HTMLerrorConnect.innerHTML = "Erreur: " + error + ".";
         } else {
             CloseMenus();
+            deletePlayers();
         }
     });
 }

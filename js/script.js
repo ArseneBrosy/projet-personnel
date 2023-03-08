@@ -7,6 +7,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 OpenMenu("connection");
+deletePlayers();
 
 //#region CONSTANTS
 const PLAYER_WIDTH = 50;
@@ -21,6 +22,7 @@ const CANON_WIDTH = 10;
 const PLAYER_SPRITE = new Image();
 PLAYER_SPRITE.src = "./images/player.png";
 const REMOVE_TIMEOUT = 500;
+const BASE_LIFE = 5;
 //#endregion
 
 //#region VARIABLES
@@ -33,6 +35,8 @@ var playerRotation = 0;
 var playerDirection = 0;
 var playerVelocityX = 0;
 var playerVelocityY = 0;
+var life = BASE_LIFE;
+var killer = "";
 //#endregion
 
 //#region FIREBASE
@@ -57,7 +61,7 @@ var mapId = 0;
 
 //#region bullets
 var bullets = [];
-var bulletSpeed = 15;
+const BULLET_SPEED = 25;
 //#endregion
 //#endregion
 
@@ -206,7 +210,7 @@ function loop() {
     //#endregion
 
     //#region FIREBASE
-    if (connectedAccount != "") {
+    if (connectedAccount != "" && life > 0) {
         sendFirebasePosition(connectedAccount, playerX, playerY, playerRotation);
         sendFirebaseBullets(connectedAccount, bullets);
     }
@@ -223,16 +227,34 @@ function loop() {
     listRef.get().then((snapshot) => {
     if (snapshot.exists()) {
         otherBullets = Object.values(snapshot.val());
+    } else {
+        otherBullets = [];
     }});
     //#endregion
 
     //#region BULLETS
     for (var i = 0; i < bullets.length; i++) {
-        bullets[i][0] += Math.sin((bullets[i][2]) * (Math.PI/180)) * bulletSpeed;
-        bullets[i][1] += Math.cos((bullets[i][2]) * (Math.PI/180)) * bulletSpeed;
-        if (isInWall(bullets[i][0], bullets[i][1])) {
+        bullets[i][0] += Math.sin((bullets[i][2]) * (Math.PI/180)) * BULLET_SPEED;
+        bullets[i][1] += Math.cos((bullets[i][2]) * (Math.PI/180)) * BULLET_SPEED;
+        if (isInWall(bullets[i][0], bullets[i][1]) || bullets[i][0] < 0 || bullets[i][0] > mapWidth || bullets[i][1] < 0 || bullets[i][1] > mapHeight) {
             bullets.splice(i, 1);
         }
+    }
+    //#endregion
+
+    //#region LIFE
+    var listRef = database.ref('players/' + connectedAccount);
+    listRef.get().then((snapshot) => {
+        if (snapshot.exists() && snapshot.val().life != null) {
+            life = BASE_LIFE - snapshot.val().life;
+            killer = snapshot.val().killer;
+        }
+    });
+    if (life <= 0) {
+        document.getElementById("killedby").innerHTML = "Tué par: " + killer;
+        OpenMenu("death");
+        var listRef = database.ref('players' + connectedAccount);
+        listRef.remove();
     }
     //#endregion
 
@@ -267,11 +289,6 @@ function loop() {
         }
     }
 
-    ctx.fillStyle = "red";
-    for (var i = 0; i < bullets.length; i++) {
-        ctx.fillRect((bullets[i][0] - 5) * mul + xOff, (bullets[i][1] - 5) * mul + yOff, 10 * mul, 10 * mul);
-    }
-
     // player
     ctx.translate(playerX * mul + xOff, playerY * mul + yOff);
     ctx.rotate(playerRotation * (Math.PI/180));
@@ -286,23 +303,24 @@ function loop() {
     // other players
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
+            // hitted by my bullet
+            var hitted = false;
+            for (var k = 0; k < bullets.length; k++) {
+                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_HEIGHT / 2) {
+                    bullets.splice(k, 1);
+                    hitPlayer(playerKeys[i], 1, connectedAccount);
+                }
+            }
+
             ctx.translate(players[i].x * mul - xOff, players[i].y * mul - yOff);
             ctx.rotate(players[i].r * (Math.PI/180));
-            ctx.fillStyle = "blue"
+            ctx.fillStyle = "blue";
             ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
-            ctx.fillStyle = "white"
+            ctx.fillStyle = "white";
             ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
             ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
             ctx.rotate(-players[i].r * (Math.PI/180));
             ctx.translate(-players[i].x * mul - xOff, -players[i].y * mul - yOff);
-
-            // hitted by my bullet
-            for (var k = 0; k < bullets.length; k++) {
-                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_HEIGHT / 2) {
-                    bullets.splice(k, 1);
-                    hitPlayer(playerKeys[i], 1);
-                }
-            }
 
             // pseudo
             ctx.fillStyle = "black";
@@ -310,6 +328,15 @@ function loop() {
             ctx.fillText(playerKeys[i], (players[i].x - playerKeys[i].length * 5) * mul + xOff, (players[i].y - PLAYER_HEIGHT) * mul + yOff);
         }
     }
+
+    //#region UI
+    // life
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "red";
+    ctx.lineWidth = 5;
+    ctx.strokeRect(20, canvas.height - 70, 200, 50);
+    ctx.fillRect(25, canvas.height - 65, 190 * (life / BASE_LIFE), 40);
+    //#endregion
     //#endregion
 
     //#region CANON

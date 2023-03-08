@@ -18,7 +18,7 @@ function sendFirebasePosition(name, x, y, r) {
     });
 }
 
-function hitPlayer(name, pv) {
+function hitPlayer(name, pv, _killer) {
     var listRef = database.ref('players/' + name);
     var _life = 0;
     listRef.get().then((snapshot) => {
@@ -27,7 +27,8 @@ function hitPlayer(name, pv) {
         }
     }).then(() => {
         listRef.set({
-            life: _life + pv
+            life: _life + pv,
+            killer: _killer
         })
     });
 }
@@ -39,5 +40,7 @@ function sendFirebaseBullets(name, bullets) {
 
 function deletePlayers() {
     var listRef = database.ref('players');
+    listRef.remove();
+    var listRef = database.ref('players-bullets');
     listRef.remove();
 }
