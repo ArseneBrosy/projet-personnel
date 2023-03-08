@@ -44,12 +44,16 @@
     padding: 0 10px;
 }
 
-.little-menu img {
+.little-menu .accountImg {
     height: 100px;
     width: 100px;
     padding: 0;
     border: none;
     border-radius: 100px;
+}
+
+.little-menu img {
+    width: 40%;
 }
 
 .little-menu p {
@@ -60,6 +64,10 @@
     text-align: center;
     font-size: 2rem;
     color: #999999
+}
+
+.little-menu p#killedby {
+    font-size: 1rem;
 }
 
 .little-menu .error {
@@ -89,6 +97,7 @@
 
 .little-menu button {
     background-color: #F77F00;
+    color: white;
     font-weight: bold;
     cursor: pointer;
     margin: 0;
@@ -97,4 +106,19 @@
     outline: none;
     border-radius: 10px;
     padding: 0 10px;
+}
+
+.little-menu button.white {
+    background-color: white;
+    color: #F77F00;
+    border: 1px solid #F77F00;
+}
+
+.little-menu div {
+    width: 60%;
+}
+
+.little-menu div * {
+    width: 100%;
+    margin: 10px 0;
 }

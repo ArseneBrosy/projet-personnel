@@ -13,7 +13,7 @@
     <!--MENUS-->
     <div class="menu connection">
         <div class="little-menu">
-            <img src="./images/account.png">
+            <img class="accountImg" src="./images/account.png">
             <p>Connection</p>
             <input type="text" id="name-connect" placeholder="Pseudo">
             <input type="password" id="password-connect" placeholder="Mot de passe">
@@ -27,7 +27,7 @@
     </div>
     <div class="menu register">
         <div class="little-menu">
-            <img src="./images/account.png">
+            <img class="accountImg" src="./images/account.png">
             <p>Créer un compte</p>
             <input type="text" id="name-register" placeholder="Pseudo">
             <input type="password" id="password-register" placeholder="Mot de passe">
@@ -40,8 +40,18 @@
             </span>
         </div>
     </div>
+    <div class="menu death">
+        <div class="little-menu">
+            <div>
+                <p>Vous êtes mort</p>
+                <p id="killedby">Tué par: </p>
+            </div>
+            <img src="./images/deathImage.png" alt="image mort">
+            <button onclick="window.location.reload();">Rejouer</button>
+        </div>
+    </div>
 
-    <!--FIREBASE-->
+    <!--FIREBASE LIB-->
     <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-database-compat.js"></script>
     <!--SECONDARY SCRIPTS-->
