@@ -37,6 +37,7 @@ var playerVelocityX = 0;
 var playerVelocityY = 0;
 var life = BASE_LIFE;
 var killer = "";
+var dead = false;
 //#endregion
 
 //#region FIREBASE
@@ -106,6 +107,17 @@ function rotateAround(deg, pos) {
 // shoot a bullet
 function shoot() {
     bullets.push([playerX, playerY, canonRotation]);
+}
+
+// respawm
+function Respawn() {
+    playerX = mapWidth / 2;
+    playerY = mapHeight - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
+    playerRotation = 0;
+    playerVelocityX = 0;
+    playerVelocityY = 0;
+    dead = false;
+    CloseMenus();
 }
 //#endregion
 
@@ -210,7 +222,7 @@ function loop() {
     //#endregion
 
     //#region FIREBASE
-    if (connectedAccount != "" && life > 0) {
+    if (connectedAccount != "" && !dead) {
         sendFirebasePosition(connectedAccount, playerX, playerY, playerRotation);
         sendFirebaseBullets(connectedAccount, bullets);
     }
@@ -251,10 +263,12 @@ function loop() {
         }
     });
     if (life <= 0) {
+        dead = true;
+        setPlayerLife(connectedAccount, 0);
+        life = BASE_LIFE;
         document.getElementById("killedby").innerHTML = "Tué par: " + killer;
         OpenMenu("death");
-        var listRef = database.ref('players' + connectedAccount);
-        listRef.remove();
+        setTimeout(deletePlayers, 500);
     }
     //#endregion
 
@@ -304,9 +318,8 @@ function loop() {
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
             // hitted by my bullet
-            var hitted = false;
             for (var k = 0; k < bullets.length; k++) {
-                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_HEIGHT / 2) {
+                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_WIDTH / 2) {
                     bullets.splice(k, 1);
                     hitPlayer(playerKeys[i], 1, connectedAccount);
                 }
@@ -345,11 +358,10 @@ function loop() {
 
     playerRotation %= 360;
     if (playerX < 0 || playerX > mapWidth || playerY < 0 || playerY > mapHeight) {
-        playerX = mapWidth / 2;
-        playerY = mapHeight - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
-        playerRotation = 0;
-        playerVelocityX = 0;
-        playerVelocityY = 0;
+        document.getElementById("killedby").innerHTML = "Tombé dans le vide";
+        OpenMenu("death");
+        var listRef = database.ref('players' + connectedAccount);
+        listRef.remove();
     }
     requestAnimationFrame(loop);
 }
