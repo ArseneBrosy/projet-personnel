@@ -37,6 +37,7 @@ var playerVelocityX = 0;
 var playerVelocityY = 0;
 var life = BASE_LIFE;
 var killer = "";
+var dead = false;
 //#endregion
 
 //#region FIREBASE
@@ -66,6 +67,43 @@ const BULLET_SPEED = 25;
 //#endregion
 
 //#region FUNCTIONS
+// set map id
+function ChooseMap(id) {
+    // maps
+    switch (id) {
+        case 0:
+            // top box
+            walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 - 100 + OUTSIDE_WALL_WIDTH * 2, mapHeight / 4])
+            walls.push([mapWidth / 2 - 100, mapHeight / 4 - OUTSIDE_WALL_WIDTH * 2, mapWidth / 2 + 100, mapHeight / 4])
+
+            // center plateform
+            walls.push([mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+            walls.push([mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+            walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+
+            // corner
+            walls.push([mapWidth - OUTSIDE_WALL_WIDTH * 4, mapHeight - OUTSIDE_WALL_WIDTH * 4, mapWidth, mapHeight]);
+
+            // left box
+            walls.push([0, 200, OUTSIDE_WALL_WIDTH * 4, 300]);
+            break;
+        case 1:
+            // cross
+            walls.push([mapWidth / 2 - OUTSIDE_WALL_WIDTH, OUTSIDE_WALL_WIDTH * 3, mapWidth / 2 + OUTSIDE_WALL_WIDTH, mapHeight - OUTSIDE_WALL_WIDTH * 3]);
+            walls.push([OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 - OUTSIDE_WALL_WIDTH, mapWidth - OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 + OUTSIDE_WALL_WIDTH]);
+
+            // dots
+            walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 2, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 2])
+            walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 1, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 1])
+            walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 1.5])
+            walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 2.5, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 2.5])
+            break;
+    }
+    if (connectedAccount != "") {
+        CloseMenus();
+    }
+}
+
 // check if an x, y coord is in a wall (adjustable margin)
 function isInWall(x, y, margin = 0) {
     var result = false;
@@ -107,6 +145,17 @@ function rotateAround(deg, pos) {
 function shoot() {
     bullets.push([playerX, playerY, canonRotation]);
 }
+
+// respawm
+function Respawn() {
+    playerX = mapWidth / 2;
+    playerY = mapHeight - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
+    playerRotation = 0;
+    playerVelocityX = 0;
+    playerVelocityY = 0;
+    dead = false;
+    CloseMenus();
+}
 //#endregion
 
 //#region CREATE MAP
@@ -115,37 +164,7 @@ walls.push([0, 0, OUTSIDE_WALL_WIDTH, mapHeight]);
 walls.push([mapWidth - OUTSIDE_WALL_WIDTH, 0, mapWidth, mapHeight]);
 walls.push([0, 0, mapWidth, OUTSIDE_WALL_WIDTH]);
 walls.push([0, mapHeight - OUTSIDE_WALL_WIDTH, mapWidth, mapHeight]);
-
-// maps
-switch (mapId) {
-    case 0:
-        // top box
-        walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 - 100 + OUTSIDE_WALL_WIDTH * 2, mapHeight / 4])
-        walls.push([mapWidth / 2 - 100, mapHeight / 4 - OUTSIDE_WALL_WIDTH * 2, mapWidth / 2 + 100, mapHeight / 4])
-
-        // center plateform
-        walls.push([mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
-        walls.push([mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
-        walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
-
-        // corner
-        walls.push([mapWidth - OUTSIDE_WALL_WIDTH * 4, mapHeight - OUTSIDE_WALL_WIDTH * 4, mapWidth, mapHeight]);
-
-        // left box
-        walls.push([0, 200, OUTSIDE_WALL_WIDTH * 4, 300]);
-        break;
-    case 1:
-        // cross
-        walls.push([mapWidth / 2 - OUTSIDE_WALL_WIDTH, OUTSIDE_WALL_WIDTH * 3, mapWidth / 2 + OUTSIDE_WALL_WIDTH, mapHeight - OUTSIDE_WALL_WIDTH * 3]);
-        walls.push([OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 - OUTSIDE_WALL_WIDTH, mapWidth - OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 + OUTSIDE_WALL_WIDTH]);
-
-        // dots
-        walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 2, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 2])
-        walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 1, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 1])
-        walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 1.5])
-        walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 2.5, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 2.5])
-        break;
-}
+ChooseMap(mapId);
 //#endregion
 
 function loop() {
@@ -210,7 +229,7 @@ function loop() {
     //#endregion
 
     //#region FIREBASE
-    if (connectedAccount != "" && life > 0) {
+    if (connectedAccount != "" && !dead) {
         sendFirebasePosition(connectedAccount, playerX, playerY, playerRotation);
         sendFirebaseBullets(connectedAccount, bullets);
     }
@@ -251,10 +270,12 @@ function loop() {
         }
     });
     if (life <= 0) {
+        dead = true;
+        setPlayerLife(connectedAccount, 0);
+        life = BASE_LIFE;
         document.getElementById("killedby").innerHTML = "Tué par: " + killer;
         OpenMenu("death");
-        var listRef = database.ref('players' + connectedAccount);
-        listRef.remove();
+        setTimeout(deletePlayers, 500);
     }
     //#endregion
 
@@ -304,9 +325,8 @@ function loop() {
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
             // hitted by my bullet
-            var hitted = false;
             for (var k = 0; k < bullets.length; k++) {
-                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_HEIGHT / 2) {
+                if (Math.abs(players[i].x - bullets[k][0]) <= PLAYER_WIDTH / 2 && Math.abs(players[i].y - bullets[k][1]) <= PLAYER_WIDTH / 2) {
                     bullets.splice(k, 1);
                     hitPlayer(playerKeys[i], 1, connectedAccount);
                 }
@@ -343,17 +363,23 @@ function loop() {
     canonRotation = (mouseY > (playerY * mul + yOff) ? 0 : 180) + Math.atan(((playerX * mul + xOff) - mouseX) / ((playerY * mul + yOff) - mouseY)) / (Math.PI/180);
     //#endregion
 
+    //#region AMIFIRST
+    if (players.length <= 1 && connectedAccount != "" && mapId === -1) {
+        //OpenMenu("mapselector");
+    }
+    //#endregion
+
     playerRotation %= 360;
     if (playerX < 0 || playerX > mapWidth || playerY < 0 || playerY > mapHeight) {
-        playerX = mapWidth / 2;
-        playerY = mapHeight - PLAYER_HEIGHT / 2 - OUTSIDE_WALL_WIDTH;
-        playerRotation = 0;
-        playerVelocityX = 0;
-        playerVelocityY = 0;
+        document.getElementById("killedby").innerHTML = "Tombé dans le vide";
+        OpenMenu("death");
+        var listRef = database.ref('players' + connectedAccount);
+        listRef.remove();
     }
     requestAnimationFrame(loop);
 }
 
+//#region INPUTS
 //position de la souris
 canvas.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
@@ -387,6 +413,7 @@ document.addEventListener('keyup', function(e) {
 window.addEventListener('beforeunload', function() {
     deletePlayers();
 }, false);
+//#endregion
 
 // start game
 requestAnimationFrame(loop);

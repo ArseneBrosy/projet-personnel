@@ -47,7 +47,14 @@
                 <p id="killedby">Tué par: </p>
             </div>
             <img src="./images/deathImage.png" alt="image mort">
-            <button onclick="window.location.reload();">Rejouer</button>
+            <button onclick="Respawn()">Rejouer</button>
+        </div>
+    </div>
+    <div class="menu mapselector">
+        <div class="little-menu">
+            <p>Choix de la map</p>
+            <input type="number" id="map-id" placeholder="Id de la map" min="0" max="3">
+            <button onclick="ChooseMap(parseInt(document.getElementById('map-id').value))">Jouer</button>
         </div>
     </div>
 

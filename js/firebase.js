@@ -33,6 +33,21 @@ function hitPlayer(name, pv, _killer) {
     });
 }
 
+function setPlayerLife(name, value) {
+    var listRef = database.ref('players/' + name);
+    var _killer = "";
+    listRef.get().then((snapshot) => {
+        if (snapshot.exists() && snapshot.val().killer != null) {
+            _killer = snapshot.val().killer;
+        }
+    }).then(() => {
+        listRef.set({
+            life: value,
+            killer: _killer
+        })
+    });
+}
+
 function sendFirebaseBullets(name, bullets) {
     var listRef = database.ref('players-bullets/' + name);
     listRef.set(Object.assign(bullets));
