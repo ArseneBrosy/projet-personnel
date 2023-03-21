@@ -67,6 +67,43 @@ const BULLET_SPEED = 25;
 //#endregion
 
 //#region FUNCTIONS
+// set map id
+function ChooseMap(id) {
+    // maps
+    switch (id) {
+        case 0:
+            // top box
+            walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 - 100 + OUTSIDE_WALL_WIDTH * 2, mapHeight / 4])
+            walls.push([mapWidth / 2 - 100, mapHeight / 4 - OUTSIDE_WALL_WIDTH * 2, mapWidth / 2 + 100, mapHeight / 4])
+
+            // center plateform
+            walls.push([mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+            walls.push([mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+            walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
+
+            // corner
+            walls.push([mapWidth - OUTSIDE_WALL_WIDTH * 4, mapHeight - OUTSIDE_WALL_WIDTH * 4, mapWidth, mapHeight]);
+
+            // left box
+            walls.push([0, 200, OUTSIDE_WALL_WIDTH * 4, 300]);
+            break;
+        case 1:
+            // cross
+            walls.push([mapWidth / 2 - OUTSIDE_WALL_WIDTH, OUTSIDE_WALL_WIDTH * 3, mapWidth / 2 + OUTSIDE_WALL_WIDTH, mapHeight - OUTSIDE_WALL_WIDTH * 3]);
+            walls.push([OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 - OUTSIDE_WALL_WIDTH, mapWidth - OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 + OUTSIDE_WALL_WIDTH]);
+
+            // dots
+            walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 2, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 2])
+            walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 1, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 1])
+            walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 1.5])
+            walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 2.5, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 2.5])
+            break;
+    }
+    if (connectedAccount != "") {
+        CloseMenus();
+    }
+}
+
 // check if an x, y coord is in a wall (adjustable margin)
 function isInWall(x, y, margin = 0) {
     var result = false;
@@ -127,37 +164,7 @@ walls.push([0, 0, OUTSIDE_WALL_WIDTH, mapHeight]);
 walls.push([mapWidth - OUTSIDE_WALL_WIDTH, 0, mapWidth, mapHeight]);
 walls.push([0, 0, mapWidth, OUTSIDE_WALL_WIDTH]);
 walls.push([0, mapHeight - OUTSIDE_WALL_WIDTH, mapWidth, mapHeight]);
-
-// maps
-switch (mapId) {
-    case 0:
-        // top box
-        walls.push([mapWidth / 2 - 100, 0, mapWidth / 2 - 100 + OUTSIDE_WALL_WIDTH * 2, mapHeight / 4])
-        walls.push([mapWidth / 2 - 100, mapHeight / 4 - OUTSIDE_WALL_WIDTH * 2, mapWidth / 2 + 100, mapHeight / 4])
-
-        // center plateform
-        walls.push([mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 4, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
-        walls.push([mapWidth / 2 + 300 - OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 + 300, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
-        walls.push([mapWidth / 2 - 300, mapHeight * 0.6 - OUTSIDE_WALL_WIDTH, mapWidth / 2 - 300 + OUTSIDE_WALL_WIDTH * 2, mapHeight * 0.6 + OUTSIDE_WALL_WIDTH])
-
-        // corner
-        walls.push([mapWidth - OUTSIDE_WALL_WIDTH * 4, mapHeight - OUTSIDE_WALL_WIDTH * 4, mapWidth, mapHeight]);
-
-        // left box
-        walls.push([0, 200, OUTSIDE_WALL_WIDTH * 4, 300]);
-        break;
-    case 1:
-        // cross
-        walls.push([mapWidth / 2 - OUTSIDE_WALL_WIDTH, OUTSIDE_WALL_WIDTH * 3, mapWidth / 2 + OUTSIDE_WALL_WIDTH, mapHeight - OUTSIDE_WALL_WIDTH * 3]);
-        walls.push([OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 - OUTSIDE_WALL_WIDTH, mapWidth - OUTSIDE_WALL_WIDTH * 3, mapHeight / 2 + OUTSIDE_WALL_WIDTH]);
-
-        // dots
-        walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 2, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 2])
-        walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 - OUTSIDE_WALL_WIDTH * 1, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1, mapHeight * .25 + OUTSIDE_WALL_WIDTH * 1])
-        walls.push([mapWidth * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 1.5, mapWidth * .75 + OUTSIDE_WALL_WIDTH * 1.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 1.5])
-        walls.push([mapWidth * .25 - OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 - OUTSIDE_WALL_WIDTH * 2.5, mapWidth * .25 + OUTSIDE_WALL_WIDTH * 2.5, mapHeight * .75 + OUTSIDE_WALL_WIDTH * 2.5])
-        break;
-}
+ChooseMap(mapId);
 //#endregion
 
 function loop() {
@@ -356,6 +363,12 @@ function loop() {
     canonRotation = (mouseY > (playerY * mul + yOff) ? 0 : 180) + Math.atan(((playerX * mul + xOff) - mouseX) / ((playerY * mul + yOff) - mouseY)) / (Math.PI/180);
     //#endregion
 
+    //#region AMIFIRST
+    if (players.length <= 1 && connectedAccount != "" && mapId === -1) {
+        //OpenMenu("mapselector");
+    }
+    //#endregion
+
     playerRotation %= 360;
     if (playerX < 0 || playerX > mapWidth || playerY < 0 || playerY > mapHeight) {
         document.getElementById("killedby").innerHTML = "Tombé dans le vide";
@@ -366,6 +379,7 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
+//#region INPUTS
 //position de la souris
 canvas.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
@@ -399,6 +413,7 @@ document.addEventListener('keyup', function(e) {
 window.addEventListener('beforeunload', function() {
     deletePlayers();
 }, false);
+//#endregion
 
 // start game
 requestAnimationFrame(loop);

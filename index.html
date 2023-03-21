@@ -50,6 +50,13 @@
             <button onclick="Respawn()">Rejouer</button>
         </div>
     </div>
+    <div class="menu mapselector">
+        <div class="little-menu">
+            <p>Choix de la map</p>
+            <input type="number" id="map-id" placeholder="Id de la map" min="0" max="3">
+            <button onclick="ChooseMap(parseInt(document.getElementById('map-id').value))">Jouer</button>
+        </div>
+    </div>
 
     <!--FIREBASE LIB-->
     <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app-compat.js"></script>
