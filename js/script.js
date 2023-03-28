@@ -310,17 +310,6 @@ function loop() {
         }
     }
 
-    // player
-    ctx.translate(playerX * mul + xOff, playerY * mul + yOff);
-    ctx.rotate(playerRotation * (Math.PI/180));
-    ctx.fillStyle = "red"
-    ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
-    ctx.fillStyle = "white"
-    ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
-    ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
-    ctx.rotate(-playerRotation * (Math.PI/180));
-    ctx.translate(-playerX * mul + xOff, -playerY * mul + yOff);
-
     // other players
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
@@ -348,6 +337,17 @@ function loop() {
             ctx.fillText(playerKeys[i], (players[i].x - playerKeys[i].length * 5) * mul + xOff, (players[i].y - PLAYER_HEIGHT) * mul + yOff);
         }
     }
+
+    // player
+    ctx.translate(playerX * mul + xOff, playerY * mul + yOff);
+    ctx.rotate(playerRotation * (Math.PI/180));
+    ctx.fillStyle = "red"
+    ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
+    ctx.fillStyle = "white"
+    ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
+    ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
+    ctx.rotate(-playerRotation * (Math.PI/180));
+    ctx.translate(-playerX * mul + xOff, -playerY * mul + yOff);
 
     //#region UI
     // life
