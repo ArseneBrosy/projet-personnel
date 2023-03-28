@@ -310,17 +310,6 @@ function loop() {
         }
     }
 
-    // player
-    ctx.translate(playerX * mul + xOff, playerY * mul + yOff);
-    ctx.rotate(playerRotation * (Math.PI/180));
-    ctx.fillStyle = "red"
-    ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
-    ctx.fillStyle = "white"
-    ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
-    ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
-    ctx.rotate(-playerRotation * (Math.PI/180));
-    ctx.translate(-playerX * mul + xOff, -playerY * mul + yOff);
-
     // other players
     for (var i = 0; i < players.length; i ++) {
         if (playerKeys[i] != connectedAccount) {
@@ -349,6 +338,17 @@ function loop() {
         }
     }
 
+    // player
+    ctx.translate(playerX * mul + xOff, playerY * mul + yOff);
+    ctx.rotate(playerRotation * (Math.PI/180));
+    ctx.fillStyle = "red"
+    ctx.fillRect(-PLAYER_WIDTH * mul / 2, -PLAYER_HEIGHT * mul / 2, PLAYER_WIDTH * mul, PLAYER_HEIGHT * mul);
+    ctx.fillStyle = "white"
+    ctx.fillRect(-PLAYER_WIDTH * 0.4 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
+    ctx.fillRect(PLAYER_WIDTH * 0.4 * mul - 10 * mul, -PLAYER_HEIGHT * 0.4 * mul, 10 * mul, 10 * mul);
+    ctx.rotate(-playerRotation * (Math.PI/180));
+    ctx.translate(-playerX * mul + xOff, -playerY * mul + yOff);
+
     //#region UI
     // life
     ctx.strokeStyle = "black";
@@ -361,12 +361,6 @@ function loop() {
 
     //#region CANON
     canonRotation = (mouseY > (playerY * mul + yOff) ? 0 : 180) + Math.atan(((playerX * mul + xOff) - mouseX) / ((playerY * mul + yOff) - mouseY)) / (Math.PI/180);
-    //#endregion
-
-    //#region AMIFIRST
-    if (players.length <= 1 && connectedAccount != "" && mapId === -1) {
-        //OpenMenu("mapselector");
-    }
     //#endregion
 
     playerRotation %= 360;
