@@ -363,12 +363,6 @@ function loop() {
     canonRotation = (mouseY > (playerY * mul + yOff) ? 0 : 180) + Math.atan(((playerX * mul + xOff) - mouseX) / ((playerY * mul + yOff) - mouseY)) / (Math.PI/180);
     //#endregion
 
-    //#region AMIFIRST
-    if (players.length <= 1 && connectedAccount != "" && mapId === -1) {
-        //OpenMenu("mapselector");
-    }
-    //#endregion
-
     playerRotation %= 360;
     if (playerX < 0 || playerX > mapWidth || playerY < 0 || playerY > mapHeight) {
         document.getElementById("killedby").innerHTML = "Tombé dans le vide";
